@@ -11,7 +11,7 @@ MAKEFLAGS += --no-builtin-rules
 .SECONDEXPANSION:
 
 # Output name.
-TARGET := compiler-rt
+TARGET := libclang_rt.builtins
 
 # Directories.
 SRCDIR := compiler-rt/lib/builtins
