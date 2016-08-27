@@ -1,0 +1,12 @@
+# Double-precision FPU ARM sources
+
+arm/adddf3vfp.S
+arm/divdf3vfp.S
+arm/extendsfdf2vfp.S
+arm/fixdfsivfp.S
+arm/fixunsdfsivfp.S
+arm/floatsidfvfp.S
+arm/floatunssidfvfp.S
+arm/muldf3vfp.S
+arm/subdf3vfp.S
+arm/truncdfsf2vfp.S

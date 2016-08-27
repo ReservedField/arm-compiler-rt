@@ -1,0 +1,18 @@
+# Sources that can't be compiled for Thumb processors
+
+arm/aeabi_cdcmp.S
+arm/aeabi_cfcmp.S
+arm/eqdf2vfp.S
+arm/eqsf2vfp.S
+arm/gedf2vfp.S
+arm/gesf2vfp.S
+arm/gtdf2vfp.S
+arm/gtsf2vfp.S
+arm/ledf2vfp.S
+arm/lesf2vfp.S
+arm/ltdf2vfp.S
+arm/ltsf2vfp.S
+arm/nedf2vfp.S
+arm/nesf2vfp.S
+arm/unorddf2vfp.S
+arm/unordsf2vfp.S

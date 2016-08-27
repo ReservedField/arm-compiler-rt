@@ -1,0 +1,7 @@
+/obj/
+/lib/
+
+*.o
+*.a
+
+.DS_Store

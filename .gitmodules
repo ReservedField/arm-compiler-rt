@@ -1,0 +1,4 @@
+[submodule "compiler-rt"]
+	path = compiler-rt
+	url = https://github.com/llvm-mirror/compiler-rt
+	branch = release_39
