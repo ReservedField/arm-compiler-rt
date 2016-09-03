@@ -1,12 +1,11 @@
+sudo: required
+dist: trusty
 language: c
 addons:
   apt:
     packages:
     - binutils-arm-none-eabi
     - gcc-arm-none-eabi
-install:
-  - git submodule init
-  - git submodule update
 script: make all
 before_deploy: make dist
 deploy:
