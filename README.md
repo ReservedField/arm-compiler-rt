@@ -37,6 +37,9 @@ You can also build and clean single targets using `make target` and
 
 Parallel make (`-j` option) is supported.
 
+To create a distributable package use `make dist` (will output to the `dist`
+directory). To clean everything, including distribs, use `make distclean`.
+
 # License
 
 You're allowed to use this project under the terms of the MIT license. See the

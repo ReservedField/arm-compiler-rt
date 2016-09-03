@@ -13,11 +13,15 @@ MAKEFLAGS += --no-builtin-rules
 # Output name.
 TARGET := libclang_rt.builtins
 
+# Distribution name.
+DSTNAME := arm-compiler-rt
+
 # Directories.
 SRCDIR := compiler-rt/lib/builtins
 LSTDIR := list
 OBJDIR := obj
 LIBDIR := lib
+DSTDIR := dist
 
 # Toolchain binaries.
 CC := arm-none-eabi-gcc
@@ -129,10 +133,21 @@ add-group = $(eval $(call group-rules,$1,$2,$3))
 
 # all: default, build everything (prereqs set by add-target).
 .DEFAULT_GOAL := all
-# clean: clean everything.
+# clean: clean everything, excluding distribution.
 clean:
 	rm -rf $(OBJDIR) $(LIBDIR)
-.PHONY: all clean
+# dist: build everything and package for distribution.
+dist: all
+	rm -rf $(DSTDIR)/$(DSTVER)
+	mkdir -p $(DSTDIR)/$(DSTVER)
+	ln -s ../../$(LIBDIR) $(DSTDIR)/$(DSTVER)/$(LIBDIR)
+	tar -C $(DSTDIR) -zchf $(DSTDIR)/$(DSTVER).tar.gz $(DSTVER)
+dist: DSTVER := $(DSTNAME)-$(or $(shell \
+	git describe --abbrev --dirty --always --tags),unknown)
+# distclean: clean everything, including distribution.
+distclean: clean
+	rm -rf $(DSTDIR)
+.PHONY: all clean dist distclean
 
 # TODO: we're compiling a little too much stuff. This isn't a problem since
 # unused objects won't get linked into the final binary, but it makes the build
