@@ -17,7 +17,8 @@ TARGET := libclang_rt.builtins
 DSTNAME := arm-compiler-rt
 
 # Directories.
-SRCDIR := compiler-rt/lib/builtins
+CRTDIR := compiler-rt
+SRCDIR := $(CRTDIR)/lib/builtins
 LSTDIR := list
 OBJDIR := obj
 LIBDIR := lib
@@ -133,20 +134,29 @@ add-group = $(eval $(call group-rules,$1,$2,$3))
 
 # all: default, build everything (prereqs set by add-target).
 .DEFAULT_GOAL := all
+
 # clean: clean everything, excluding distribution.
 clean:
 	rm -rf $(OBJDIR) $(LIBDIR)
+
 # dist: build everything and package for distribution.
 dist: all
-	rm -rf $(DSTDIR)/$(DSTVER)
-	mkdir -p $(DSTDIR)/$(DSTVER)
-	ln -s ../../$(LIBDIR) $(DSTDIR)/$(DSTVER)/$(LIBDIR)
-	tar -C $(DSTDIR) -zchf $(DSTDIR)/$(DSTVER).tar.gz $(DSTVER)
-dist: DSTVER := $(DSTNAME)-$(or $(shell \
-	git describe --abbrev --dirty --always --tags),unknown)
+	mkdir -p $(DSTDIR)
+	mkdir $(TMPDIR)/$(DSTVER)
+	$(call dist-symlink,README.dist,README)
+	$(call dist-symlink,$(CRTDIR)/CREDITS.TXT)
+	$(call dist-symlink,$(CRTDIR)/LICENSE.TXT)
+	$(call dist-symlink,$(LIBDIR))
+	rm -rf $(DSTDIR)/$(DSTVER).tar.gz
+	tar -C $(TMPDIR) -zchf $(DSTDIR)/$(DSTVER).tar.gz $(DSTVER)
+dist: DSTVER := $(DSTNAME)-$(or $(shell git describe --abbrev --dirty --always --tags 2> /dev/null),unknown)
+dist: TMPDIR := $(shell mktemp -d)
+dist-symlink = ln -s $(abspath $1) $(TMPDIR)/$(DSTVER)/$(or $2,$(notdir $1))
+
 # distclean: clean everything, including distribution.
 distclean: clean
 	rm -rf $(DSTDIR)
+
 .PHONY: all clean dist distclean
 
 # TODO: we're compiling a little too much stuff. This isn't a problem since
