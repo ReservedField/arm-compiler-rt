@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/ReservedField/arm-compiler-rt.svg?branch=master)](https://travis-ci.org/ReservedField/arm-compiler-rt)
+
 This is an experiment to make building `compiler-rt` for bare metal ARM targets
 easy. It bypasses the CMake build system and is much quicker to setup.
 
