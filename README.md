@@ -7,6 +7,7 @@ easy. It bypasses the CMake build system and is much quicker to setup.
 
  * `arm-none-eabi` binutils
  * `arm-none-eabi` GCC
+ * `arm-none-eabi` libc (e.g. newlib)
  * GNU make >= 3.81
 
 # Cloning

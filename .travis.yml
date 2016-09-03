@@ -6,6 +6,7 @@ addons:
     packages:
     - binutils-arm-none-eabi
     - gcc-arm-none-eabi
+    - libnewlib-arm-none-eabi
 script: make all
 before_deploy: make dist
 deploy:
