@@ -166,7 +166,7 @@ distclean: clean
 
 # armv6m: ARMv6-M.
 CPUFLAGS_ARMV6M := -march=armv6-m -mthumb
-$(call add-target,armv6m,armv6-m,$(CPUFLAGS_ARMV6M),generic arm,thumb armv6m)
+$(call add-target,armv6m,armv6-m,$(CPUFLAGS_ARMV6M),generic,thumb)
 
 # armv7m: ARMv7-M.
 CPUFLAGS_ARMV7M := -march=armv7-m -mthumb -mfix-cortex-m3-ldrd
