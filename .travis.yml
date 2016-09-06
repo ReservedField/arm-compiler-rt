@@ -7,7 +7,7 @@ addons:
     - binutils-arm-none-eabi
     - gcc-arm-none-eabi
     - libnewlib-arm-none-eabi
-script: make all
+script: CC=arm-none-eabi-gcc make all
 before_deploy: make dist
 deploy:
   provider: releases
