@@ -3,14 +3,27 @@
 This is an experiment to make building `compiler-rt` for bare metal ARM targets
 easy. It bypasses the CMake build system and is much quicker to setup.
 
-# Dependencies
+## Prebuilts
+
+You can grab prebuilt packages from the [Releases](https://github.com/ReservedField/arm-compiler-rt/releases)
+page. Those are deployed from Travis for tagged commits that I deem stable, so
+you'll usually be fine with the latest one.
+
+They are built using `binutils-arm-none-eabi`, `gcc-arm-none-eabi` and
+`libnewlib-arm-none-eabi` from Ubuntu Trusty repositories. Note that newlib is
+only used for headers, so the prebuilts should work even if you link against a
+different libc.
+
+## Building from source
+
+### Dependencies
 
  * `arm-none-eabi` binutils
  * `arm-none-eabi` GCC
  * `arm-none-eabi` libc (e.g. newlib)
  * GNU make >= 3.81
 
-# Cloning
+### Cloning
 
 `compiler-rt` is provided as a submodule:
 ```
@@ -20,9 +33,9 @@ git submodule init
 git submodule update
 ```
 
-# Building
+### Building
 
-To build everything, you can just issue `make`. To clean your whole build, use
+To build everything just issue `make`. To clean the whole build use
 `make clean`.
 
 You can also build and clean single targets using `make target` and
@@ -43,7 +56,14 @@ Parallel make (`-j` option) is supported.
 To create a distributable package use `make dist` (will output to the `dist`
 directory). To clean everything, including distribs, use `make distclean`.
 
-# License
+## Known bugs
+
+ * Nested functions are not supported (we need bare-metal implementations for
+   trampoline builtins).
+ * ARMv7E-M with double-precision FPU should be built for VFPv5, but GCC
+   doesn't like it. Worked around by building for VFPv4.
+
+## License
 
 You're allowed to use this project under the terms of the MIT license. See the
 `LICENSE` file for the full text.

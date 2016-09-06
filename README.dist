@@ -9,4 +9,6 @@ Prebuilt libraries are in lib/, divided in the following directories:
 - armv7e-m/fpu-dp/: ARMv7E-M, hard double-precision VFPv4 float ABI
                     (e.g. Cortex-M7F with DP FPU)
 
+Please note that nested functions are not supported yet.
+
 The original CREDITS.TXT and LICENSE.TXT from compiler-rt are included.
