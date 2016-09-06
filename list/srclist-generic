@@ -4,12 +4,17 @@
 # --- Apple versioning ---
 # This is empty if __APPLE__ is not defined.
 # apple_versioning.c
+# --- Cache invalidation ---
+# Trampolines for nested function require instruction cache invalidation.
+# A bare-metal implementation of this is needed to make nested functions work.
+# clear_cache.c
 # --- Executable stack for trampolines ---
 # Trampolines for nested functions require an executable stack area.
-# This file is written for an OS, but we don't have one. On most embedded
-# systems the stack isn't NX, so there's no need for this. If you have a NX
-# stack and use nested functions, you'll have to reimplement it.
+# A bare-metal implementation of this is needed to make nested functions work.
 # enable_execute_stack.c
+# --- Trampoline setup ---
+# This is empty unless we're compiling for PowerPC.
+# trampoline_setup.c
 
 # Excluded optionals:
 # --- C11 _Atomic support ---
@@ -40,7 +45,6 @@ ashldi3.c
 ashlti3.c
 ashrdi3.c
 ashrti3.c
-clear_cache.c
 clzdi2.c
 clzsi2.c
 clzti2.c
@@ -145,7 +149,6 @@ subvdi3.c
 subvsi3.c
 subvti3.c
 subtf3.c
-trampoline_setup.c
 truncdfhf2.c
 truncdfsf2.c
 truncsfhf2.c
