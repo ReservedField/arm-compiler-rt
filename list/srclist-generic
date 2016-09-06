@@ -1,6 +1,9 @@
 # Generic compiler-rt sources
 
 # Excluded:
+# --- Apple versioning ---
+# This is empty if __APPLE__ is not defined.
+# apple_versioning.c
 # --- Executable stack for trampolines ---
 # Trampolines for nested functions require an executable stack area.
 # This file is written for an OS, but we don't have one. On most embedded
@@ -33,7 +36,6 @@ addtf3.c
 addvdi3.c
 addvsi3.c
 addvti3.c
-apple_versioning.c
 ashldi3.c
 ashlti3.c
 ashrdi3.c
