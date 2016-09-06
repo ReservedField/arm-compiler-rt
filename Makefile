@@ -3,6 +3,20 @@ ifneq ($(and $(MAKE_VERSION),$(firstword $(sort $(MAKE_VERSION) 3.81))),3.81)
 $(error Make >= 3.81 required)
 endif
 
+# Detect compiler. CC_IS_CLANG is set to 1 for Clang, empty for GCC.
+# Note that this doesn't error out straight away: it'll bail out when building
+# the first object. This avoids useless errors for targets that don't build
+# anything (e.g. clean, or dist when everything's already built).
+CC_VERSION := $(shell $(CC) -v 2>&1)
+CC_IS_CLANG := $(if $(findstring clang version,$(CC_VERSION)),1)
+ifndef CC_IS_CLANG
+	ifeq ($(findstring gcc version,$(CC_VERSION)),)
+		CC_CHECK_ERROR := Unsupported compiler
+	else ifeq ($(findstring Target: arm-none-eabi,$(CC_VERSION)),)
+		CC_CHECK_ERROR := Your GCC doesn't target arm-none-eabi
+	endif
+endif
+
 # Disable all builtin rules.
 MAKEFLAGS += --no-builtin-rules
 .SUFFIXES:
@@ -25,12 +39,30 @@ LIBDIR := lib
 DSTDIR := dist
 
 # Toolchain binaries.
-CC := arm-none-eabi-gcc
 AR := arm-none-eabi-ar
 
 # Common compiler flags.
 # Pretty much one function per object, no need for -fdata/function-sections.
-CFLAGS := -std=gnu99 -fPIC -fno-builtin -fvisibility=hidden -fomit-frame-pointer
+# Clang generates some harmless warnings for GCC-only attributes, silence them.
+CFLAGS := \
+	-std=gnu99 -fPIC -fno-builtin -fvisibility=hidden -fomit-frame-pointer \
+	$(if $(CC_IS_CLANG),-Wno-unknown-attributes) \
+	$(foreach d,$(INCDIRS),-I$d)
+
+# Gets the architectural compiler flags for a target.
+# Argument 1: architecture name, in GCC's -march format. Suffix with :thumb to
+#             only generate Thumb code.
+# Argument 2: FPU. Optional, defaults to no FPU.
+# Argument 3: float ABI (soft, softfp, hard). Optional, defaults to soft if no
+#             FPU is specified or hard if it is.
+target-cflags = \
+	$(call __target-cflags-arch,$(subst :, ,$1)) \
+	-mfloat-abi=$(or $3,$(if $2,hard,soft)) \
+	$(if $(CC_IS_CLANG),-mfpu=$(or $2,none),$(if $2,-mfpu=$2))
+__target-cflags-arch = $(call __target-cflags-arch-gen,$(word 1,$1),$(word 2,$1))
+__target-cflags-arch-gen = \
+	$(if $(CC_IS_CLANG),-target $(subst -,,$1)-none-eabi,-march=$1) \
+	$(if $(filter thumb,$2),-mthumb)
 
 # Reads the content of the specified lists in the list/prefix-name path.
 # Argument 1: list prefix.
@@ -90,12 +122,17 @@ build-dirs-tmpl = $(call get-dirs,$(call objbase-tmpl,$1),$3) $(call libbase-tmp
 # Argument 3: CPU-specific compiler flags.
 # Argument 4: relative object path(s).
 define build-rules
+ifdef CC_CHECK_ERROR
+$(call objpat-tmpl,$1):
+	$$(error $(CC_CHECK_ERROR))
+else
 $(call objpat-tmpl,$1): $(SRCDIR)/%.c | $$$$(@D)
 	$$(call info-cmd,$1,CC)
 	@$(CC) $3 $(CFLAGS) -c $$< -o $$@
 $(call objpat-tmpl,$1): $(SRCDIR)/%.S | $$$$(@D)
 	$$(call info-cmd,$1,AS)
 	@$(CC) $3 $(CFLAGS) -c $$< -o $$@
+endif
 $(call lib-tmpl,$2): $(call objs-tmpl,$1,$4) | $$$$(@D)
 	$$(call info-cmd,$1,AR)
 	@$(AR) -rc $$@ $$^
@@ -165,24 +202,25 @@ distclean: clean
 # tweak our owns, but we have to make sure they're not too Xcode-specific.
 
 # armv6m: ARMv6-M.
-CPUFLAGS_ARMV6M := -march=armv6-m -mthumb
+CPUFLAGS_ARMV6M := $(call target-cflags,armv6-m:thumb)
 $(call add-target,armv6m,armv6-m,$(CPUFLAGS_ARMV6M),generic,thumb)
 
 # armv7m: ARMv7-M.
-CPUFLAGS_ARMV7M := -march=armv7-m -mthumb -mfix-cortex-m3-ldrd
+CPUFLAGS_ARMV7M := $(call target-cflags,armv7-m:thumb) $(if $(CC_IS_CLANG),,-mfix-cortex-m3-ldrd)
 $(call add-target,armv7m,armv7-m,$(CPUFLAGS_ARMV7M),generic arm,thumb)
 
 # armv7em-sf: ARMv7E-M, soft float ABI.
-CPUFLAGS_ARMV7EM_SF := -march=armv7e-m -mthumb -mfloat-abi=soft
+CPUFLAGS_ARMV7EM_SF := $(call target-cflags,armv7e-m:thumb)
 $(call add-target,armv7em-sf,armv7e-m,$(CPUFLAGS_ARMV7EM_SF),generic arm,thumb)
 
 # armv7em-hf: ARMv7E-M, hard float ABI, single-precision VFPv4.
-CPUFLAGS_ARMV7EM_HF := -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16
+CPUFLAGS_ARMV7EM_HF := $(call target-cflags,armv7e-m:thumb,fpv4-sp-d16)
 $(call add-target,armv7em-hf,armv7e-m/fpu,$(CPUFLAGS_ARMV7EM_HF),generic arm arm-fpu,thumb)
 
 # armv7em-hf-dp: ARMv7E-M, hard float ABI, double-precision VFPv4.
-# TODO: this should be VFPv5, but the assembler chokes on -mfpu=fpv5-d16.
-CPUFLAGS_ARMV7EM_HF_DP := -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=vfpv4-d16
+# TODO: this should be VFPv5, but GCC's assembler chokes on -mfpu=fpv5-d16.
+# VFPv5 works with Clang, though.
+CPUFLAGS_ARMV7EM_HF_DP := $(call target-cflags,armv7e-m:thumb,vfpv4-d16)
 $(call add-target,armv7em-hf-dp,armv7e-m/fpu-dp,$(CPUFLAGS_ARMV7EM_HF_DP),generic arm arm-fpu arm-fpu-dp,thumb)
 
 # armv7em: group of all ARMv7E-M targets.
