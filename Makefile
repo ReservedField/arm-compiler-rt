@@ -41,12 +41,18 @@ DSTDIR := dist
 # Toolchain binaries.
 AR := arm-none-eabi-ar
 
+# Include directories.
+INCDIRS := include
+
 # Common compiler flags.
 # Pretty much one function per object, no need for -fdata/function-sections.
 # Clang generates some harmless warnings for GCC-only attributes, silence them.
+# Clang's stdint.h uses cascading redefinitions, but doesn't undef before
+# redefining. Silence those macro-redefined warnings, too.
 CFLAGS := \
 	-std=gnu99 -fPIC -fno-builtin -fvisibility=hidden -fomit-frame-pointer \
-	$(if $(CC_IS_CLANG),-Wno-unknown-attributes) \
+	-ffreestanding \
+	$(if $(CC_IS_CLANG),-Wno-unknown-attributes -Wno-macro-redefined) \
 	$(foreach d,$(INCDIRS),-I$d)
 
 # Gets the architectural compiler flags for a target.

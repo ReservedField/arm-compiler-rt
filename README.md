@@ -3,16 +3,23 @@
 This is an experiment to make building `compiler-rt` for bare metal ARM targets
 easy. It bypasses the CMake build system and is much quicker to setup.
 
+## Libc compatibility
+
+This compiler-rt is **libc-agnostic, but not freestanding**. In other words, it
+requires you to link a libc into your code, but it will work with any (sane)
+libc. If you don't want to link against libc, your code has to provide
+implementations for the following functions:
+
+* `void abort(void)` (from `stdlib.h`)
+
 ## Prebuilts
 
 You can grab prebuilt packages from the [Releases](https://github.com/ReservedField/arm-compiler-rt/releases)
 page. Those are deployed from Travis for tagged commits that I deem stable, so
 you'll usually be fine with the latest one.
 
-They are built using `binutils-arm-none-eabi`, `gcc-arm-none-eabi` and
-`libnewlib-arm-none-eabi` from Ubuntu Trusty repositories. Note that newlib is
-only used for headers, so the prebuilts should work even if you link against a
-different libc.
+Prebuilts are built using `binutils-arm-none-eabi` and `gcc-arm-none-eabi` from
+Ubuntu Trusty repositories.
 
 ## Building from source
 
@@ -21,13 +28,14 @@ different libc.
 Those are all required:
 
  * `arm-none-eabi` binutils
- * `arm-none-eabi` libc (e.g. newlib)
  * GNU make >= 3.81
 
 One of those compilers is required:
 
  * `arm-none-eabi` GCC
  * Clang >= 3.9.0
+
+Note that you don't need a libc.
 
 ### Cloning
 
@@ -39,37 +47,15 @@ git submodule init
 git submodule update
 ```
 
-### Preparation
+### Before building
 
-You need to properly set `CC` for `make` to point to your cross compiler.
+When invoking `make` you need to properly set `CC` to point to your cross
+compiler. A typical make invocation may look like `CC=arm-none-eabi-gcc make`
+for GCC or `CC=clang make` for Clang.
 
-You also need to check that your `arm-none-eabi` libc headers are in your
-compiler search path. It can be done with `CC -v -x c /dev/null` (replace `CC`
-with your actual compiler).
-
-The most common situation is that you've installed your software from repos,
-which usually means that `arm-none-eabi-gcc` will have the libc headers set up
-but Clang won't. If you need to add include paths you can specify a
-space-separated list with the `INCDIRS` variable.
-
-A typical GCC build looks like:
-```
-CC=arm-none-eabi-gcc make
-```
-
-A typical Clang build looks like:
-```
-CC=clang INCDIRS=/usr/arm-none-eabi/include make
-```
-
-Please make sure you've set those correctly - don't build against the system
-libc headers. Note that builds might succeed even without explicit headers and
-without libc being in the search path because the compiler is pulling them from
-the system. You don't want that! Check your include paths.
-
-You'll need to specify those options everytime you're building something, even
-though for brevity it's not explicited in the Building section. The exceptions
-are of course `clean(-target)`, `distclean` and `dist` (for the latter, only if
+You need to specify `CC` everytime you're building something, even though for
+brevity it's not explicited in the Building section. The exceptions are of
+course `clean(-target)`, `distclean` and `dist` (for the latter, only if
 everything's already built).
 
 ### Building
@@ -114,6 +100,19 @@ provide bare-metal implementations for `enable_execute_stack.c` and
 `clear_cache.c`. Those are trivial if no OS is present. People using an RTOS
 and nested functions will have to write implementations themselves.
 
+The libc-agnostic build is obtained with a couple tricks. First, we build
+with `-ffreestanding`. This means that the standard headers will provide a
+generic implementation, instead of falling back to the system/libc ones like a
+hosted build (the assumption here is that compiler headers come before system
+headers in the search path - if that's not true on your system you should fix
+your evil ways). Some files do require libc headers (e.g. `int_util.c` needs
+`stdlib.h` for `abort()`). For this reason, extremely stripped-down headers are
+provided in the `include` directory. Since they only define standard prototypes
+they're fairly generic. Note that our custom include directory is specified on
+the compiler command line, and as such takes precedence over standard search
+paths. This means that if your compiler is configured for a libc your libc
+headers won't be used (which is what we want).
+
 I'd like to expand on building this compiler-rt with Clang, since it will also
 expose some issues you might encounter if you start getting your hands dirty
 and some shortcomings on ARMv6-M.
@@ -149,7 +148,3 @@ generate veeners for 16-bit branches (while it does for 32-bit ones). Hitting
 an out-of-range branch at link time is never nice. The real solution is an
 ARMv6-M forwarding for those functions (using `BL`, as its 32-bit form is
 supported, or a litpool).
-
-By the way, it seems that libc isn't actually needed when building with Clang,
-because it falls back to freestanding headers. I haven't tested this well
-enough, so for now I've kept the libc requirement.
