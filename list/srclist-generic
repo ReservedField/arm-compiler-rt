@@ -12,6 +12,10 @@
 # Trampolines for nested functions require an executable stack area.
 # A bare-metal implementation of this is needed to make nested functions work.
 # enable_execute_stack.c
+# --- __eprintf() ---
+# Only needed for compatibility with objects compiled with an old <assert.h>.
+# This seems to be needed only on i386, see LLVM bugs #29063 and #28855.
+# eprintf.c
 # --- Trampoline setup ---
 # This is empty unless we're compiling for PowerPC.
 # trampoline_setup.c
@@ -68,7 +72,6 @@ divtc3.c
 divti3.c
 divtf3.c
 divxc3.c
-eprintf.c
 extendsfdf2.c
 extendhfsf2.c
 ffsdi2.c
