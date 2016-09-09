@@ -3,10 +3,13 @@ dist: trusty
 language: c
 addons:
   apt:
+    sources:
+    - sourceline: 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-3.9 main'
+      key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
     packages:
     - binutils-arm-none-eabi
-    - gcc-arm-none-eabi
-script: CC=arm-none-eabi-gcc make all
+    - clang-3.9
+script: CC=clang-3.9 make all
 before_deploy: make dist
 deploy:
   provider: releases
