@@ -18,8 +18,8 @@ You can grab prebuilt packages from the [Releases](https://github.com/ReservedFi
 page. Those are deployed from Travis for tagged commits that I deem stable, so
 you'll usually be fine with the latest one.
 
-Prebuilts are built using `binutils-arm-none-eabi` and `gcc-arm-none-eabi` from
-Ubuntu Trusty repositories.
+Prebuilts are built using `binutils-arm-none-eabi` from Ubuntu Trusty
+repositories and `clang-3.9` from [LLVM repositories](http://apt.llvm.org).
 
 ## Building from source
 
