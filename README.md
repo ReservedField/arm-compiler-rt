@@ -91,8 +91,6 @@ directory). To clean everything, including distribs, use `make distclean`.
 
  * Nested functions are not supported (we need bare-metal implementations for
    trampoline builtins).
- * ARMv7E-M with double-precision FPU should be built for VFPv5, but GCC
-   doesn't like it. Worked around by building for VFPv4.
 
 ## License
 
