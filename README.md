@@ -35,7 +35,10 @@ One of those compilers is required:
  * `arm-none-eabi` GCC
  * Clang >= 3.9.0
 
-Note that you don't need a libc.
+Note that you don't need a libc. If you want to build the `armv7em-hf-dp`
+target with GCC your `arm-none-eabi` binutils need to be >= 2.26, because `gas`
+lacked VFPv5 support before that. Clang uses its own assembler, so it doesn't
+need recent binutils. Other targets are not affected by this problem.
 
 ### Cloning
 
@@ -70,9 +73,9 @@ You can also build and clean single targets using `make target` and
  * `armv7m`: ARMv7-M (e.g. Cortex-M3). Outputs to `lib/armv7-m`.
  * `armv7em-sf`: ARMv7E-M, soft float ABI (e.g. Cortex-M4/M7).
    Outputs to `lib/armv7e-m`.
- * `armv7em-hf`: ARMv7E-M, hard VFPv4 float ABI (e.g. Cortex-M4F/M7F).
+ * `armv7em-hf`: ARMv7E-M, hard float ABI, VFPv4 FPU (e.g. Cortex-M4F/M7F).
    Outputs to `lib/armv7e-m/fpu`.
- * `armv7em-hf-dp`: ARMv7E-M, hard double-precision VFPv4 float ABI
+ * `armv7em-hf-dp`: ARMv7E-M, hard float ABI, double-precision VFPv5 FPU
    (e.g. Cortex-M7F with DP FPU). Outputs to `lib/armv7e-m/fpu-dp`.
  * `armv7em`: all ARMv7E-M targets.
 

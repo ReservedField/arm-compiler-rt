@@ -223,10 +223,8 @@ $(call add-target,armv7em-sf,armv7e-m,$(CPUFLAGS_ARMV7EM_SF),generic arm,thumb)
 CPUFLAGS_ARMV7EM_HF := $(call target-cflags,armv7e-m:thumb,fpv4-sp-d16)
 $(call add-target,armv7em-hf,armv7e-m/fpu,$(CPUFLAGS_ARMV7EM_HF),generic arm arm-fpu,thumb)
 
-# armv7em-hf-dp: ARMv7E-M, hard float ABI, double-precision VFPv4.
-# TODO: this should be VFPv5, but GCC's assembler chokes on -mfpu=fpv5-d16.
-# VFPv5 works with Clang, though.
-CPUFLAGS_ARMV7EM_HF_DP := $(call target-cflags,armv7e-m:thumb,vfpv4-d16)
+# armv7em-hf-dp: ARMv7E-M, hard float ABI, double-precision VFPv5.
+CPUFLAGS_ARMV7EM_HF_DP := $(call target-cflags,armv7e-m:thumb,fpv5-d16)
 $(call add-target,armv7em-hf-dp,armv7e-m/fpu-dp,$(CPUFLAGS_ARMV7EM_HF_DP),generic arm arm-fpu arm-fpu-dp,thumb)
 
 # armv7em: group of all ARMv7E-M targets.
