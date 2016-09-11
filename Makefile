@@ -223,9 +223,13 @@ $(call add-target,armv7em-sf,armv7e-m,$(CPUFLAGS_ARMV7EM_SF),generic arm,thumb)
 CPUFLAGS_ARMV7EM_HF := $(call target-cflags,armv7e-m:thumb,fpv4-sp-d16)
 $(call add-target,armv7em-hf,armv7e-m/fpu,$(CPUFLAGS_ARMV7EM_HF),generic arm arm-fpu,thumb)
 
+# armv7em-hf-v5: ARMv7E-M, hard float ABI, single-precision VFPv5.
+CPUFLAGS_ARMV7EM_HF_V5 := $(call target-cflags,armv7e-m:thumb,fpv5-sp-d16)
+$(call add-target,armv7em-hf-v5,armv7e-m/fpu-v5,$(CPUFLAGS_ARMV7EM_HF_V5),generic arm arm-fpu,thumb)
+
 # armv7em-hf-dp: ARMv7E-M, hard float ABI, double-precision VFPv5.
 CPUFLAGS_ARMV7EM_HF_DP := $(call target-cflags,armv7e-m:thumb,fpv5-d16)
 $(call add-target,armv7em-hf-dp,armv7e-m/fpu-dp,$(CPUFLAGS_ARMV7EM_HF_DP),generic arm arm-fpu arm-fpu-dp,thumb)
 
 # armv7em: group of all ARMv7E-M targets.
-$(call add-group,armv7em,armv7em-sf armv7em-hf armv7em-hf-dp,armv7e-m)
+$(call add-group,armv7em,armv7em-sf armv7em-hf armv7em-hf-v5 armv7em-hf-dp,armv7e-m)
